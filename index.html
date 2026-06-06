@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uyoon</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Comic Sans MS', 'Noto Sans', sans-serif;
+    background: linear-gradient(135deg, #87CEEB, #FFD700);
+    text-align: center; padding: 15px; user-select: none;
+  }
+.screen { display: none; max-width: 1000px; margin: 0 auto; }
+.active { display: block; }
+  h1 { font-size: 2.8rem; text-shadow: 2px 2px #fff; margin: 15px 0; }
+  h2 { font-size: 1.8rem; color: #4B0082; margin: 12px 0; }
+.big-btn {
+    font-size: 1.8rem; padding: 18px 35px; margin: 8px; border: none;
+    border-radius: 20px; color: white; cursor: pointer;
+    min-width: 80px; min-height: 80px; transition: 0.1s;
+  }
+.big-btn:active { transform: translateY(4px); }
+.small-btn { font-size: 1.2rem; padding: 10px 20px; min-height: 50px; }
+.option-btn { font-size: 2.2rem; }
+.card {
+    background: white; border-radius: 25px; padding: 20px;
+    margin: 15px auto; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+.roman { font-size: 4.5rem; color: #FF4500; font-weight: bold; word-break: break-all; }
+.arabic { font-size: 3rem; color: #1E90FF; }
+.emoji { font-size: 3.5rem; margin: 8px; }
+.progress { width: 100%; height: 25px; background: #ddd; border-radius: 15px; margin: 12px 0; }
+.progress-bar { height: 100%; border-radius: 15px; transition: width 0.5s; }
+.stars { font-size: 2.5rem; }
+.rule-box { background: #FFFACD; border: 4px dashed #FF8C00; text-align: left; }
+  #topBar { position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 10; }
+  input { font-size: 1.4rem; padding: 8px; border-radius: 10px; border: 3px solid #1E90FF; }
+.hint { color: #FF4500; font-size: 1.4rem; margin: 8px; animation: blink 1s infinite; }
+.game-type { font-size: 1.1rem; color: #4B0082; background: #E6E6FA; padding: 5px 15px; border-radius: 20px; display: inline-block; }
+.footer { font-size: 0.9rem; color: #555; margin-top: 15px; }
+.mode-btn { background: #9370DB; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+.confetti { position: fixed; width: 10px; height: 10px; background: #f00; animation: fall 3s linear; }
+  @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 12px; max-width: 700px; margin: 0 auto; }
+.flex-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.rule-item { margin: 10px 0; padding: 10px; background: white; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div id="topBar">
+  <button class="big-btn small-btn" id="langBtn" onclick="toggleLang()">हिंदी</button>
+  <button class="big-btn small-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+</div>
+
+<!-- Welcome Screen -->
+<div id="welcome" class="screen active">
+  <h1 id="gameTitle"></h1>
+  <div class="emoji" id="welcomeEmoji"></div>
+  <div class="card">
+    <h2 id="tagline"></h2>
+    <p style="font-size:1.4rem" id="agePrompt">Choose your level:</p>
+    <div class="flex-row">
+      <button class="big-btn mode-btn" onclick="startGame(1)" id="mode1">5-7 Years<br>I to XII</button>
+      <button class="big-btn mode-btn" onclick="startGame(2)" id="mode2">8-10 Years<br>I to C</button>
+      <button class="big-btn mode-btn" onclick="startGame(3)" id="mode3">11+ Adult<br>I to MMMCMXCIX</button>
+    </div>
+    <div class="footer" id="footerText"></div>
+  </div>
+</div>
+
+<!-- Game Screen -->
+<div id="game" class="screen">
+  <div class="progress"><div id="progBar" class="progress-bar" style="width:0%"></div></div>
+  <div class="flex-row">
+    <div class="stars" id="stars">⭐</div>
+    <div class="game-type" id="gameType"></div>
+  </div>
+  <div class="card" id="lessonCard"></div>
+  <div id="options"></div>
+  <div id="hintBox"></div>
+</div>
+
+<!-- Rules Screen -->
+<div id="rules" class="screen">
+  <h1 id="rulesTitle">Magic Rules 🪄</h1>
+  <div class="card rule-box" id="rulesContent"></div>
+  <button class="big-btn" onclick="nextLevel()" id="finalTestBtn">Final Test 🏆</button>
+</div>
+
+<!-- Certificate Screen -->
+<div id="end" class="screen">
+  <h1 id="champTitle">🎉 Roman Champion! 🎉</h1>
+  <div class="card">
+    <div class="emoji">🏆🐘👑</div>
+    <h2 id="certTitle">Certificate</h2>
+    <p style="font-size:1.4rem" id="certLine1">This certifies that</p>
+    <input id="kidName" placeholder="Your name" />
+    <p style="font-size:1.4rem" id="certText"></p>
+    <div class="stars" id="finalStars">⭐⭐⭐⭐⭐</div>
+    <button class="big-btn" onclick="window.print()" id="printBtn">Print 📄</button>
+    <button class="big-btn" onclick="location.reload()" id="newGameBtn">New Game 🔄</button>
+    <div class="footer" id="certFooter"></div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// OWNER CONFIG - EDIT HERE ONLY
+// ============================================
+const CONFIG = {
+  GAME_NAME: "Uyoon",
+  TAGLINE_EN: "Roman Numbers Made Fun",
+  TAGLINE_HI: "Roman Number Mazedar Tarike Se",
+  HOST_NAME: "Team Uyoon",
+  PRIMARY_COLOR: "#32CD32",
+  ACCENT_COLOR: "#FF1493",
+  WELCOME_EMOJI: "🐘📜🦁",
+  CERTIFICATE_TEXT_EN: "has mastered Roman Numbers up to",
+  CERTIFICATE_TEXT_HI: "ne Roman Numbers seekh liye",
+  FOOTER_TEXT_EN: "Made with ❤️ for learners",
+  FOOTER_TEXT_HI: "Seekhne walon ke liye ❤️ se banaya"
+};
+// ============================================
+
+let LANG = 'en'; // 'en' or 'hi'
+let TEXT = {
+  en: {
+    agePrompt: "Choose your level:",
+    mode1: "5-7 Years<br>I to XII",
+    mode2: "8-10 Years<br>I to C",
+    mode3: "11+ Adult<br>I to MMMCMXCIX",
+    gameTypes: ['Tap Correct Number', 'Find Roman', 'Match Pairs', 'What Comes Next?'],
+    rulesTitle: "Magic Rules 🪄",
+    ruleDesc: "Small number before big = Minus. Big after small = Add",
+    finalTestBtn: "Final Test 🏆",
+    champTitle: "🎉 Roman Champion! 🎉",
+    certTitle: "Certificate",
+    certLine1: "This certifies that",
+    printBtn: "Print 📄",
+    newGameBtn: "New Game 🔄",
+    tryAgain: "Try again 💪",
+    hint: "Hint: Answer = ",
+    correct: "Correct!",
+    langBtn: "हिंदी"
+  },
+  hi: {
+    agePrompt: "Apna level chuno:",
+    mode1: "5-7 Saal<br>I se XII",
+    mode2: "8-10 Saal<br>I se C",
+    mode3: "11+ Adult<br>I se MMMCMXCIX",
+    gameTypes: ['Sahi Number Dabao', 'Roman Pehchano', 'Jodi Banao', 'Agla Kya Hai?'],
+    rulesTitle: "Jaadui Niyam 🪄",
+    ruleDesc: "Chota number bade ke pehle = Minus. Bada baad me = Jod",
+    finalTestBtn: "Final Test 🏆",
+    champTitle: "🎉 Roman Champion! 🎉",
+    certTitle: "Praman Patra",
+    certLine1: "Yeh pramanit karta hai ki",
+    printBtn: "Print 📄",
+    newGameBtn: "Naya Game 🔄",
+    tryAgain: "Phir koshish karo 💪",
+    hint: "Sanket: Jawab = ",
+    correct: "Sahi!",
+    langBtn: "English"
+  }
+};
+
+// Roman converter for 1-3999
+function toRoman(num) {
+  if (num < 1 || num > 3999) return "";
+  const map = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+  let result = '';
+  for (let i in map) {
+    while (num >= map[i]) {
+      result += i;
+      num -= map[i];
+    }
+  }
+  return result;
+}
+
+function fromRoman(roman) {
+  const map = {I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+  let result = 0;
+  for (let i = 0; i < roman.length; i++) {
+    let curr = map[roman[i]], next = map[roman[i+1]];
+    if (next > curr) result -= curr;
+    else result += curr;
+  }
+  return result;
+}
+
+// Apply CONFIG + Language
+function applyConfig() {
+  document.title = CONFIG.GAME_NAME;
+  document.getElementById('gameTitle').textContent = CONFIG.GAME_NAME;
+  document.getElementById('gameTitle').style.color = CONFIG.ACCENT_COLOR;
+  document.getElementById('welcomeEmoji').textContent = CONFIG.WELCOME_EMOJI;
+  document.getElementById('footerText').textContent = `By ${CONFIG.HOST_NAME} | ${CONFIG['FOOTER_TEXT_' + LANG.toUpperCase()]}`;
+  document.querySelectorAll('.big-btn').forEach(btn => {
+    btn.style.background = CONFIG.PRIMARY_COLOR;
+    btn.style.boxShadow = `0 8px ${CONFIG.PRIMARY_COLOR}99`;
+  });
+  document.getElementById('progBar').style.background = CONFIG.PRIMARY_COLOR;
+  updateLang();
+}
+
+function updateLang() {
+  const t = TEXT[LANG];
+  document.getElementById('tagline').textContent = CONFIG['TAGLINE_' + LANG.toUpperCase()];
+  document.getElementById('agePrompt').textContent = t.agePrompt;
+  document.getElementById('mode1').innerHTML = t.mode1;
+  document.getElementById('mode2').innerHTML = t.mode2;
+  document.getElementById('mode3').innerHTML = t.mode3;
+  document.getElementById('rulesTitle').textContent = t.rulesTitle;
+  document.getElementById('finalTestBtn').textContent = t.finalTestBtn;
+  document.getElementById('champTitle').textContent = t.champTitle;
+  document.getElementById('certTitle').textContent = t.certTitle;
+  document.getElementById('certLine1').textContent = t.certLine1;
+  document.getElementById('certText').textContent = CONFIG['CERTIFICATE_TEXT_' + LANG.toUpperCase()];
+  document.getElementById('printBtn').textContent = t.printBtn;
+  document.getElementById('newGameBtn').textContent = t.newGameBtn;
+  document.getElementById('langBtn').textContent = t.langBtn;
+  document.getElementById('certFooter').textContent = `Powered by ${CONFIG.GAME_NAME}`;
+  document.getElementById('kidName').placeholder = LANG==='hi'?'Apna naam':'Your name';
+}
+
+function toggleLang() {
+  LANG = LANG === 'en'? 'hi' : 'en';
+  updateLang();
+  if(document.getElementById('game').classList.contains('active')) showQuestion();
+}
+
+let questions = [], current = 0, score = 0, wrongCount = 0, muted = false, maxNum = 12, mode = 1;
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+  if(muted) return;
+  let osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.frequency.value = type==='correct'?800:type==='wrong'?200:1000;
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+}
+
+function toggleMute(){ muted =!muted; document.getElementById('muteBtn').textContent = muted?'🔇':'🔊'; }
+function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
+
+function startGame(selectedMode) {
+  mode = selectedMode;
+  maxNum = mode===1?12:mode===2?100:3999; // Age wise max
+  let pool = [];
+  for(let i=1; i<=maxNum; i++) pool.push({a:i, q:toRoman(i), emoji:getEmoji(i)});
+  questions = shuffle(pool).slice(0,10);
+  current = 0; score = 0;
+  showScreen('game'); showQuestion();
+}
+
+function getEmoji(num) {
+  const e = ['🍎','🚗','🎈','⭐','🐶','🚀','🎁','🍭','🦄','🌈'];
+  return e[num % e.length].repeat(Math.min(num,5));
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showQuestion(){
+  if(current >= questions.length){ showRules(); return; }
+  wrongCount = 0;
+  let item = questions[current];
+  let gameMode = Math.floor(Math.random()*4);
+  document.getElementById('progBar').style.width = (current / questions.length * 100) + '%';
+  document.getElementById('stars').textContent = '⭐'.repeat(Math.floor(score/2)+1);
+  document.getElementById('gameType').textContent = TEXT[LANG].gameTypes[gameMode];
+
+  let cardHTML = '', optionsHTML = '';
+  if(gameMode === 0){ // Tap Number
+    cardHTML = `<div class="roman">${item.q}</div><div class="emoji">${getEmoji(item.a)}</div>`;
+    let opts = shuffle([item.a,...shuffle(Array.from({length:maxNum},(_,i)=>i+1).filter(n=>n!==item.a)).slice(0,3)]);
+    optionsHTML = opts.map(n => `<button class="big-btn option-btn" onclick="checkAnswer(${n},${item.a})">${n}</button>`).join('');
+  }
+  else if(gameMode === 1){ // Find Roman
+    cardHTML = `<div class="arabic">${item.a}</div><div class="emoji">${getEmoji(item.a)}</div>`;
+    let opts = shuffle([item.q,...shuffle(questions.filter(n=>n.q!==item.q)).slice(0,3).map(n=>n.q)]);
+    optionsHTML = opts.map(n => `<button class="big-btn option-btn" onclick="checkAnswer('${n}','${item.q}')">${n}</button>`).join('');
+  }
+  else if(gameMode === 2){ // Match
+    let item2 = questions.filter(n=>n.a!==item.a)[0];
+    cardHTML = `<h2>${LANG==='hi'?'Jodi Banao!':'Match Pairs!'}</h2>`;
+    let pairs = shuffle([{l:item.q,r:item.a},{l:item2.q,r:item2.a}]);
+    optionsHTML = `<div class="grid">
+      ${pairs.map(p=>`<button class="big-btn option-btn" onclick="matchClick(this,${p.r})">${p.l}</button>`).join('')}
+      ${shuffle(pairs).map(p=>`<button class="big-btn option-btn" onclick="matchClick(this,${p.r})">${p.r}</button>`).join('')}
+    </div>`;
+    window.matchSelected = null;
+  }
+  else { // Next number
+    let nextNum = item.a + 1;
+    if(nextNum > maxNum) nextNum = item.a - 1;
+    cardHTML = `<div class="roman">${item.q}</div><p class="arabic">${item.a} ${LANG==='hi'?'ke baad?':'next?'}</p>`;
+    let opts = shuffle([nextNum, nextNum+1, nextNum-1].filter(n=>n>0&&n<=maxNum));
+    optionsHTML = opts.map(n => `<button class="big-btn option-btn" onclick="checkAnswer(${n},${nextNum})">${n}</button>`).join('');
+  }
+  document.getElementById('lessonCard').innerHTML = cardHTML;
+  document.getElementById('options').innerHTML = optionsHTML;
+  document.getElementById('hintBox').innerHTML = '';
+}
+
+function checkAnswer(selected, correct){
+  if(selected == correct){
+    playSound('correct'); score++; confetti(); current++;
+    setTimeout(showQuestion, 700);
+  } else {
+    playSound('wrong'); wrongCount++;
+    document.getElementById('hintBox').innerHTML = wrongCount>=2?
+      `<div class="hint">${TEXT[LANG].hint}${correct} 👆</div>` :
+      `<div class="hint">${TEXT[LANG].tryAgain}</div>`;
+  }
+}
+
+function matchClick(btn, val){
+  if(!window.matchSelected){
+    window.matchSelected = {btn, val};
+    btn.style.background = '#FFD700';
+  } else {
+    if(window.matchSelected.val === val && window.matchSelected.btn!== btn){
+      playSound('correct'); score++; confetti();
+      window.matchSelected.btn.style.background = '#32CD32';
+      btn.style.background = '#32CD32';
+      setTimeout(()=>{ current++; showQuestion(); }, 700);
+    } else {
+      playSound('wrong');
+      window.matchSelected.btn.style.background = CONFIG.PRIMARY_COLOR;
+      window.matchSelected = null;
+    }
+  }
+}
+
+function showRules(){
+  const rules = mode===1?[
+    {r:'IV',n:4,ex:'5-1',hi:'1, 5 se pehle'},
+    {r:'IX',n:9,ex:'10-1',hi:'1, 10 se pehle'}
+  ]:mode===2?[
+    {r:'IV',n:4,ex:'5-1',hi:'1, 5 se pehle'},
+    {r:'IX',n:9,ex:'10-1',hi:'1, 10 se pehle'},
+    {r:'XL',n:40,ex:'50-10',hi:'10, 50 se pehle'},
+    {r:'XC',n:90,ex:'100-10',hi:'10, 100 se pehle'}
+  ]:[
+    {r:'IV',n:4,ex:'5-1',hi:'V se pehle I'},
+    {r:'IX',n:9,ex:'10-1',hi:'X se pehle I'},
+    {r:'XL',n:40,ex:'50-10',hi:'L se pehle X'},
+    {r:'XC',n:90,ex:'100-10',hi:'C se pehle X'},
+    {r:'CD',n:400,ex:'500-100',hi:'D se pehle C'},
+    {r:'CM',n:900,ex:'1000-100',hi:'M se pehle C'}
+  ];
+
+  document.getElementById('rulesContent').innerHTML = `
+    <p style="font-size:1.3rem;margin-bottom:15px">${TEXT[LANG].ruleDesc}</p>
+    ${rules.map(r=>`
+      <div class="rule-item">
+        <span class="roman" style="font-size:2.5rem">${r.r}</span> =
+        <span class="arabic" style="font-size:2rem">${r.n}</span>
+        <span style="font-size:1.2rem">(${r.ex}) - ${LANG==='hi'?r.hi:r.ex}</span>
+      </div>
+    `).join('')}
+  `;
+  showScreen('rules');
+}
+
+function nextLevel(){
+  showScreen('end'); playSound('win');
+  document.getElementById('finalStars').textContent = '⭐'.repeat(Math.min(5, Math.floor(score/2)+1));
+  document.getElementById('certText').textContent += ` ${maxNum}`;
+}
+
+function confetti(){
+  for(let i=0;i<30;i++){
+    let c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + '%';
+    c.style.background = `hsl(${Math.random()*360},100%,50%)`;
+    c.style.animationDelay = Math.random()*0.5 + 's';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 3000);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key==='p'||e.key==='P') alert(`${CONFIG.GAME_NAME}\nMode: ${mode}\nScore: ${score}/${questions.length}\nHost: ${CONFIG.HOST_NAME}`);
+});
+
+// Init
+applyConfig();
+</script>
+
+</body>
+</html>
