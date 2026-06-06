@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+   <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#32CD32">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Uyoon</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+   <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
   body {
     font-family: 'Comic Sans MS', 'Noto Sans', sans-serif;
     background: linear-gradient(135deg, #87CEEB, #FFD700);
